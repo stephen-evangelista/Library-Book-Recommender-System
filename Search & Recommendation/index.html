@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Book Recommender</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">📚</span>
+        <span class="logo-text">Book Recommender</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="search-input">Search</label>
+        <div class="search-wrap" id="search-wrap">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input id="search-input" class="input search-input" type="search"
+                 placeholder="Title, author or genre…" autocomplete="off"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false"
+                 aria-controls="search-dropdown" />
+          <ul id="search-dropdown" class="dropdown search-dropdown" role="listbox" aria-label="Search suggestions"></ul>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="sort-select">Sort by</label>
+        <select id="sort-select" class="input select">
+          <option value="id-desc">Newest added</option>
+          <option value="id-asc">Oldest added</option>
+          <option value="title-asc">Title (A → Z)</option>
+          <option value="title-desc">Title (Z → A)</option>
+          <option value="author-asc">Author (A → Z)</option>
+          <option value="author-desc">Author (Z → A)</option>
+          <option value="rating-desc">Rating (High → Low)</option>
+          <option value="rating-asc">Rating (Low → High)</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button id="btn-generate" class="btn btn-primary" type="button">+ Generate 500 Books</button>
+        <button id="btn-add" class="btn btn-secondary" type="button">+ Add Book</button>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Total Books</span>
+        <span class="stat-value" id="total-books">0</span>
+        <span class="stat-note" id="table-stats"></span>
+      </div>
+
+      <p class="sidebar-foot">Powered by a custom Hash Table, Trie, Max-Heap, Merge Sort &amp; BFS.</p>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+
+      <section class="top-section" aria-labelledby="top-heading">
+        <div class="section-head">
+          <h2 id="top-heading">🏆 Top 5 Highest Rated</h2>
+          <span class="badge">Max-Heap</span>
+        </div>
+        <div id="top-grid" class="book-grid top-grid"></div>
+      </section>
+
+      <section class="collection-section" aria-labelledby="collection-heading">
+        <div class="section-head">
+          <h2 id="collection-heading">Library Collection</h2>
+          <span class="badge badge-blue" id="result-count">0 books</span>
+          <span class="section-sub" id="collection-sub"></span>
+        </div>
+        <div id="book-grid" class="book-grid"></div>
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">🔎</div>
+          <h3>No books found</h3>
+          <p>Try a different title, author or genre.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============ 3-DOTS MENU (single floating dropdown) ============ -->
+  <div id="card-menu" class="dropdown-menu" role="menu" aria-label="Book options">
+    <button id="menu-edit" class="menu-item" type="button" role="menuitem">✏️ Edit</button>
+    <button id="menu-delete" class="menu-item danger" type="button" role="menuitem">🗑️ Delete</button>
+  </div>
+
+  <!-- ============ BOOK DETAILS MODAL ============ -->
+  <div class="modal-overlay" id="detail-modal" aria-hidden="true">
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="detail-heading">
+      <button class="modal-close" id="detail-close" type="button" aria-label="Close details">✕</button>
+      <div id="detail-body"></div>
+    </div>
+  </div>
+
+  <!-- ============ ADD / EDIT MODAL ============ -->
+  <div class="modal-overlay" id="form-modal" aria-hidden="true">
+    <div class="modal modal-md" role="dialog" aria-modal="true" aria-labelledby="form-title">
+      <button class="modal-close" id="form-close" type="button" aria-label="Close form">✕</button>
+      <h2 id="form-title" class="modal-title">Add New Book</h2>
+
+      <form id="book-form" novalidate>
+        <div class="form-group">
+          <label for="field-title">Title</label>
+          <input id="field-title" class="input" type="text" maxlength="120" placeholder="e.g. The Silent Cartographer" />
+        </div>
+        <div class="form-group">
+          <label for="field-author">Author</label>
+          <input id="field-author" class="input" type="text" maxlength="80" placeholder="e.g. Eleanor Whitlock" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field-genre">Genre</label>
+            <select id="field-genre" class="input select"></select>
+          </div>
+          <div class="form-group">
+            <label for="field-rating">Rating (0–5)</label>
+            <input id="field-rating" class="input" type="number" min="0" max="5" step="0.1" value="4.0" />
+          </div>
+          <div class="form-group">
+            <label for="field-year">Year</label>
+            <input id="field-year" class="input" type="number" min="1000" max="2100" step="1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="field-desc">Description <span class="optional">(optional)</span></label>
+          <textarea id="field-desc" class="input" rows="3" maxlength="400" placeholder="A short summary of the book…"></textarea>
+        </div>
+
+        <p id="form-error" class="form-error" role="alert"></p>
+
+        <div class="modal-actions">
+          <button id="form-cancel" class="btn btn-ghost" type="button">Cancel</button>
+          <button id="form-submit" class="btn btn-primary" type="submit">Add Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ DELETE CONFIRM MODAL ============ -->
+  <div class="modal-overlay" id="confirm-modal" aria-hidden="true">
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h2 id="confirm-title" class="modal-title">Delete this book?</h2>
+      <p id="confirm-text" class="confirm-text"></p>
+      <div class="modal-actions">
+        <button id="confirm-cancel" class="btn btn-ghost" type="button">Cancel</button>
+        <button id="confirm-delete" class="btn btn-danger" type="button">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+  <script src="dsa.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
