@@ -18,10 +18,12 @@ This system implements the following from scratch (no built-in JS Dictionaries):
 - **Graph BFS (Breadth-First Search):** Traverses a graph of related book genres to recommend similar titles.
 
 ## 🛠️ How to Run
-No installation or server is required. 
-1. Clone this repository or download the ZIP file.
-2. Open `index.html` in any modern web browser.
-3. Click **"+ Generate 500 Books"** to load the dummy dataset and start testing.
+
+The application is deployed and fully playable live on the web! No installation is required. 
+
+👉 **[Click here to open the Library Book Recommender System](https://stephen-evangelista.github.io/Library-Book-Recommender-System/)**
+
+*(Optional: If you want to run it locally, you can clone this repository and open `index.html` in any modern web browser.)*
 
 ## 👨‍💻 Author
 **Stephen Evangelista**  
